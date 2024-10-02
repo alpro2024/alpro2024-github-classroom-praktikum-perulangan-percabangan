@@ -1,0 +1,72 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: diskon 0%
+      id: diskon-0
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: diskon 0%
+        setup-command: ''
+        command: gradle test
+        input: '10000'
+        expected-output: '0.0'
+        comparison-method: exact
+        timeout: 10
+        max-score: 25
+    - name: Diskon 10%
+      id: diskon-10
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Diskon 10%
+        setup-command: ''
+        command: gradle test
+        input: '15000'
+        expected-output: '1500.0'
+        comparison-method: exact
+        timeout: 10
+        max-score: 25
+    - name: Diskon 20%
+      id: diskon-20
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Diskon 20%
+        setup-command: ''
+        command: gradle test
+        input: '50000'
+        expected-output: '10000.0'
+        comparison-method: exact
+        timeout: 10
+        max-score: 25
+    - name: Input error
+      id: input-error
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Input error
+        setup-command: ''
+        command: gradle test
+        input: "-10000"
+        expected-output: Input tidak sesuai
+        comparison-method: contains
+        timeout: 10
+        max-score: 25
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        DISKON-0_RESULTS: "${{steps.diskon-0.outputs.result}}"
+        DISKON-10_RESULTS: "${{steps.diskon-10.outputs.result}}"
+        DISKON-20_RESULTS: "${{steps.diskon-20.outputs.result}}"
+        INPUT-ERROR_RESULTS: "${{steps.input-error.outputs.result}}"
+      with:
+        runners: diskon-0,diskon-10,diskon-20,input-error
